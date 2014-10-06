@@ -42,6 +42,7 @@ function init() {
 resources.load([
     'img/tower.png',
 	'img/sprites.png',
+	'img/spider.png',
     'img/hero.png',
     'img/terrain.png'
 ]);
@@ -50,7 +51,7 @@ resources.onReady(init);
 // Game state
 var player = {
     pos: [0, 0],
-    sprite: new Sprite('img/hero.png', [0, 0], [64, 64], 5, [0, 1])
+    sprite: new Sprite('img/hero.png', [0, 0], [64, 64], 5, [0, 1, 2, 1])
 };
 var tower = {
     pos: [0, 0],
@@ -70,9 +71,9 @@ var score = 0;
 var scoreEl = document.getElementById('score');
 
 // Speed in pixels per second
-var playerSpeed = 200;
-var bulletSpeed = 400;
-var enemySpeed = 100;
+var playerSpeed = 100;
+var bulletSpeed = 300;
+var enemySpeed = 50;
 
 // Update game objects
 function update(dt) {
@@ -80,6 +81,15 @@ function update(dt) {
 
     handleInput(dt);
     updateEntities(dt);
+	
+	// It gets harder over time by adding enemies using this
+    // equation: 1-.993^gameTime
+    if(Math.random() < 1 - Math.pow(.993, gameTime)) {
+        enemies.push({
+            pos: [canvas.width, Math.random() * (canvas.height - 39)],
+            sprite: new Sprite('img/spider.png', [0, 0], [40, 35], 5, [0, 1, 2, 1])
+        });
+    }
 
     checkCollisions();
 
@@ -89,18 +99,22 @@ function update(dt) {
 function handleInput(dt) {
     if(input.isDown('DOWN') || input.isDown('s')) {
         player.pos[1] += playerSpeed * dt;
+		player.sprite = new Sprite('img/hero.png', [0, 0], [64, 64], 5, [0, 1, 2, 1]);
     }
 
     if(input.isDown('UP') || input.isDown('w')) {
         player.pos[1] -= playerSpeed * dt;
-    }
+		player.sprite = new Sprite('img/hero.png', [0, 192], [64, 64], 5, [0, 1, 2, 1]);
+	}
 
     if(input.isDown('LEFT') || input.isDown('a')) {
         player.pos[0] -= playerSpeed * dt;
+		player.sprite = new Sprite('img/hero.png', [0, 64], [64, 64], 5, [0, 1, 2, 1]);
     }
 
     if(input.isDown('RIGHT') || input.isDown('d')) {
         player.pos[0] += playerSpeed * dt;
+		player.sprite = new Sprite('img/hero.png', [0, 128], [64, 64], 5, [0, 1, 2, 1]);
     }
 
     if(input.isDown('SPACE') && !isGameOver) {
@@ -118,15 +132,16 @@ function updateEntities(dt) {
     player.sprite.update(dt);
 	// Update the tower sprite animation
     tower.sprite.update(dt);
+	var pi = Math.PI;
 	
-	if (!isGameOver && Date.now() - lastFire > 1000)
+	if (!isGameOver && Date.now() - lastFire > 500)
 	{
 		var x = tower.pos[0] + tower.sprite.size[0] / 2;
         var y = tower.pos[1] + tower.sprite.size[1] / 2;
 		
 		bullets.push({
 			pos: [x, y],
-			k: getRandomArbitrary(-1, 1),
+			k: getRandomArbitrary(-5 * pi, 5 * pi),
 			sprite: new Sprite('img/sprites.png', [0, 39], [18, 8]) 
 		});
 		
@@ -134,18 +149,15 @@ function updateEntities(dt) {
 	}
 	
     // Update all the bullets
-    for(var i=0; i<bullets.length; i++) {
+    for(var i=0; i<bullets.length; i++) {	
         var bullet = bullets[i];
 		
-		var b = bullet.pos[1] - bullet.k * bullet.pos[0];
-		if (bullet.k >= 0) {
-			bullet.pos[0] += bulletSpeed * dt;
-			bullet.pos[1] =  bullet.k * bullet.pos[0] + b;
-		}
-		else {
-			bullet.pos[0] -= bulletSpeed * dt;
-			bullet.pos[1] = bullet.k * bullet.pos[0] + b;
-		}
+		var c = dt * bulletSpeed;
+		var sin = Math.sin(bullet.k);		
+		var cos = Math.cos(bullet.k);
+		
+		bullet.pos[0] += sin * c;
+		bullet.pos[1] += cos * c;		
 		
         // Remove the bullet if it goes offscreen
         if (bullet.pos[1] < 0 || bullet.pos[1] > canvas.height ||
