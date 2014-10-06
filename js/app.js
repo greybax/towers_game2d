@@ -41,6 +41,7 @@ function init() {
 
 resources.load([
     'img/tower.png',
+	'img/sprites.png',
     'img/hero.png',
     'img/terrain.png'
 ]);
@@ -70,7 +71,7 @@ var scoreEl = document.getElementById('score');
 
 // Speed in pixels per second
 var playerSpeed = 200;
-var bulletSpeed = 500;
+var bulletSpeed = 400;
 var enemySpeed = 100;
 
 // Update game objects
@@ -107,25 +108,47 @@ function handleInput(dt) {
     }
 }
 
+// Returns a random number between min (inclusive) and max (exclusive)
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 function updateEntities(dt) {
     // Update the player sprite animation
     player.sprite.update(dt);
 	// Update the tower sprite animation
     tower.sprite.update(dt);
 	
-	bullets.push({ 
-		pos: [tower.pos[0], tower.pos[1]],
-		sprite: new Sprite('img/tower_bullet.png', [tower.pos[0], tower.pos[1]], [10, 10], 5, [0, 1, 2]) 
-	});
-
+	if (!isGameOver && Date.now() - lastFire > 1000)
+	{
+		var x = tower.pos[0] + tower.sprite.size[0] / 2;
+        var y = tower.pos[1] + tower.sprite.size[1] / 2;
+		
+		bullets.push({
+			pos: [x, y],
+			k: getRandomArbitrary(-1, 1),
+			sprite: new Sprite('img/sprites.png', [0, 39], [18, 8]) 
+		});
+		
+		lastFire = Date.now();
+	}
+	
     // Update all the bullets
     for(var i=0; i<bullets.length; i++) {
         var bullet = bullets[i];
-
-		bullet.pos[0] += bulletSpeed * dt;
+		
+		var b = bullet.pos[1] - bullet.k * bullet.pos[0];
+		if (bullet.k >= 0) {
+			bullet.pos[0] += bulletSpeed * dt;
+			bullet.pos[1] =  bullet.k * bullet.pos[0] + b;
+		}
+		else {
+			bullet.pos[0] -= bulletSpeed * dt;
+			bullet.pos[1] = bullet.k * bullet.pos[0] + b;
+		}
 		
         // Remove the bullet if it goes offscreen
-        if(bullet.pos[1] < 0 || bullet.pos[1] > canvas.height ||
+        if (bullet.pos[1] < 0 || bullet.pos[1] > canvas.height ||
            bullet.pos[0] > canvas.width) {
             bullets.splice(i, 1);
             i--;
