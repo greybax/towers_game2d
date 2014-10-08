@@ -25,8 +25,8 @@ function getRandomInt(min, max) {
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
-canvas.width = 512;
-canvas.height = 460;
+canvas.width = document.body.clientWidth - 20; //512;
+canvas.height = document.body.clientHeight  - 50; //460;
 document.body.appendChild(canvas);
 
 // The main game loop
@@ -40,7 +40,7 @@ function main() {
 
     lastTime = now;
     requestAnimFrame(main);
-};
+}
 
 function init() {
     terrainPattern = ctx.createPattern(resources.get('img/terrain.png'), 'repeat');
@@ -91,8 +91,8 @@ function update(dt) {
     updateEntities(dt);
 	
 	// It gets harder over time by adding enemies using this
-    // equation: 1-.993^gameTime
-    if (Math.random() < 1 - Math.pow(.993, gameTime)) {
+    // equation: 1-0.993^gameTime
+    if (Math.random() < 1 - Math.pow(0.993, gameTime)) {
 		switch (getRandomInt(0,4)) {
 		    case 0:	//left
 			enemies.push({
@@ -128,7 +128,7 @@ function update(dt) {
     checkCollisions();
 
     scoreEl.innerHTML = score;
-};
+}
 
 function handleInput(dt) {
     if (input.isDown('DOWN') || input.isDown('s')) {
@@ -152,17 +152,22 @@ function handleInput(dt) {
     }
 
     if (input.isDown('SPACE') && !isGameOver) {
+		var isClosest = false;
+		for (var i = 0; i < towers.length; i++) {
+			if (Math.abs(player.pos[0] - towers[i].pos[0]) < 50 && 
+				Math.abs(player.pos[1] - towers[i].pos[1]) < 50) {
+				isClosest = true;
+			}
+		}
 		
-		towers[lastTower % 3] = {
-			pos: [player.pos[0], player.pos[1]],
-			lastFire: Date.now(),
-			sprite: new Sprite('img/tower.png', [0, 0], [38, 35], 8, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
-		};
-		
-		if (lastTower < 3)
+		if (!isClosest) {
+			towers[lastTower % 3] = {
+				pos: [player.pos[0], player.pos[1]],
+				lastFire: Date.now(),
+				sprite: new Sprite('img/tower.png', [0, 0], [38, 35], 8, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+			};
 			lastTower++;
-		else
-			lastTower = 0;
+		}
     }
 }
 
@@ -237,7 +242,7 @@ function updateEntities(dt) {
     }
 
     // Update all the explosions
-    for (var i=0; i<explosions.length; i++) {
+    for (var i = 0; i < explosions.length; i++) {
         explosions[i].sprite.update(dt);
 
         // Remove if animation is done
@@ -251,8 +256,7 @@ function updateEntities(dt) {
 // Collisions
 
 function collides(x, y, r, b, x2, y2, r2, b2) {
-    return !(r <= x2 || x > r2 ||
-             b <= y2 || y > b2);
+    return !(r <= x2 || x > r2 || b <= y2 || y > b2);
 }
 
 function boxCollides(pos, size, pos2, size2) {
@@ -337,7 +341,7 @@ function render() {
     
     renderEntities(bullets);    
     renderEntities(explosions);
-};
+}
 
 function renderEntities(list) {
     for(var i=0; i<list.length; i++) {
@@ -367,4 +371,4 @@ function reset() {
     bullets = [];
 
     player.pos = [50, canvas.height / 2];
-};
+}
