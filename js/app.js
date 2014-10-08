@@ -25,8 +25,8 @@ function getRandomInt(min, max) {
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
-canvas.width = 900;
-canvas.height = 550;
+canvas.width = 512;
+canvas.height = 460;
 document.body.appendChild(canvas);
 
 // The main game loop
@@ -70,7 +70,7 @@ var bullets = [];
 var enemies = [];
 var explosions = [];
 
-var lastFire = Date.now();
+var lastTower = 0;
 var gameTime = 0;
 var isGameOver;
 var terrainPattern;
@@ -152,10 +152,17 @@ function handleInput(dt) {
     }
 
     if (input.isDown('SPACE') && !isGameOver) {
-		towers.push({
+		
+		towers[lastTower % 3] = {
 			pos: [player.pos[0], player.pos[1]],
+			lastFire: Date.now(),
 			sprite: new Sprite('img/tower.png', [0, 0], [38, 35], 8, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
-		});
+		};
+		
+		if (lastTower < 3)
+			lastTower++;
+		else
+			lastTower = 0;
     }
 }
 
@@ -168,7 +175,7 @@ function updateEntities(dt) {
 		var tower = towers[i];
 		tower.sprite.update(dt);
 
-		if (!isGameOver && Date.now() - lastFire > 500) {
+		if (!isGameOver && Date.now() - tower.lastFire > 500) {
 			var pi = Math.PI;
 			var x = tower.pos[0] + tower.sprite.size[0] / 2;
 			var y = tower.pos[1] + tower.sprite.size[1] / 2;
@@ -178,7 +185,7 @@ function updateEntities(dt) {
 				k: getRandomArbitrary(-5 * pi, 5 * pi),
 				sprite: new Sprite('img/sprites.png', [0, 39], [18, 8]) 
 			});
-			lastFire = Date.now();
+			tower.lastFire = Date.now();
 		}
 	}
 
