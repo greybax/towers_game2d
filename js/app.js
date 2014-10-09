@@ -25,8 +25,8 @@ function getRandomInt(min, max) {
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
-canvas.width = document.body.clientWidth - 20; //512;
-canvas.height = document.body.clientHeight  - 50; //460;
+canvas.width = document.body.clientWidth - 200; //512;
+canvas.height = document.body.clientHeight  - 100; //460;
 document.body.appendChild(canvas);
 
 // The main game loop
