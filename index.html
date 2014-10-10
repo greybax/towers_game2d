@@ -7,22 +7,29 @@
 
     <link rel="stylesheet" href="css/app.css">
   </head>
-  <body>
-
+  <body>	
     <div class="wrapper">
 		<div class="instructions">
-			<div> A / left arrow - move left </div>
-			<div> D / right arrow - move left </div>
-			<div> W / up arrow - move up </div>
-			<div> S / down arrow - move down </div>
-			<div> Space - set a tower </div>
+			<div> <b>A / left arrow</b> - <span class="red">move left</span> </div>
+			<div> <b>D / right arrow</b> - <span class="red">move right</span> </div>
+			<div> <b>W / up arrow</b> - <span class="red">move up</span> </div>
+			<div> <b>S / down arrow</b> - <span class="red">move down</span> </div>
+			<div> <b>Space</b> - <span class="red">set a tower</span> </div>
 		</div>
-		<div class="game_over"> 
-			<button>Play Again</button>
+		
+		<div class="score">
+			Your Score: <span id="score"></span>
 		</div>
-		<div id="score"></div>
+    </div>
+	
+	<div id="game-over-overlay">
     </div>
 
+    <div id="game-over">
+      <h1>GAME OVER</h1>
+      <button id="play-again">Play Again</button>
+    </div>
+	
     <script type="text/javascript" src="js/resources.js"></script>
     <script type="text/javascript" src="js/input.js"></script>
     <script type="text/javascript" src="js/sprite.js"></script>

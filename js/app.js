@@ -25,8 +25,8 @@ function getRandomInt(min, max) {
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
-canvas.width = document.body.clientWidth - 200; //512;
-canvas.height = document.body.clientHeight  - 100; //460;
+canvas.width = 1024;
+canvas.height = 520;
 document.body.appendChild(canvas);
 
 // The main game loop
@@ -45,6 +45,10 @@ function main() {
 function init() {
     terrainPattern = ctx.createPattern(resources.get('img/terrain.png'), 'repeat');
 
+	document.getElementById('play-again').addEventListener('click', function() {
+        reset();
+    });
+	
     reset();
     lastTime = Date.now();
     main();
@@ -305,7 +309,7 @@ function checkCollisions() {
         }
 
         if (boxCollides(pos, size, player.pos, player.sprite.size)) {
-            gameOver();
+            gameOver();	
         }
     }
 }
@@ -358,17 +362,22 @@ function renderEntity(entity) {
 
 // Game over
 function gameOver() {
+	document.getElementById('game-over').style.display = 'block';
+    document.getElementById('game-over-overlay').style.display = 'block';
     isGameOver = true;
 }
 
 // Reset game to original state
 function reset() {
+	document.getElementById('game-over').style.display = 'none';
+    document.getElementById('game-over-overlay').style.display = 'none';
     isGameOver = false;
     gameTime = 0;
     score = 0;
 
+	towers = [];
     enemies = [];
     bullets = [];
 
-    player.pos = [50, canvas.height / 2];
+    player.pos = [canvas.width / 2, canvas.height / 2];
 }
