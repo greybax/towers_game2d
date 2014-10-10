@@ -1,0 +1,60 @@
+﻿body {
+	margin: 0;
+	padding: 0;
+}
+
+canvas, .wrapper{
+	margin:0 10% 0 10%;
+}
+
+.instructions {
+    float: left;
+    font-family: sans-serif;
+    color: #757575;
+}
+
+.wrapper {
+    width: 1024px;
+    margin-top: 1em;
+}
+
+.score {
+    float: right;
+    font-size: 2em;
+}
+
+#game-over, #game-over-overlay {
+    margin:0 10% 0 10%;
+    width: 1024px;
+    height: 520px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 1em;
+    z-index: 1;
+    display: none;
+}
+
+#game-over-overlay {
+    background-color: black;
+    opacity: .5;
+}
+
+#game-over {
+    height: 350px;
+    text-align: center;
+    color: white;
+}
+
+#game-over h1 {
+    font-size: 3em;
+    font-family: sans-serif;
+}
+
+#game-over button {
+    font-size: 1.5em;
+}
+
+.red { 
+	color: red;
+}
