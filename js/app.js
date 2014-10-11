@@ -59,6 +59,7 @@ resources.load([
 	'img/sprites.png',
 	'img/spider.png',
     'img/hero.png',
+	'img/bullet.png',
     'img/terrain.png'
 ]);
 resources.onReady(init);
@@ -66,7 +67,11 @@ resources.onReady(init);
 // Game state
 var player = {
     pos: [0, 0],
-    sprite: new Sprite('img/hero.png', [0, 0], [64, 64], 5, [0, 1, 2, 1])
+    sprite: new Sprite('img/hero.png', [0, 0], [48, 30], 5, [0, 1, 2, 1]),
+	down: new Sprite('img/hero.png', [0, 0], [48, 30], 5, [0, 1, 2, 1]),
+	up: new Sprite('img/hero.png', [0, 144], [48, 30], 5, [0, 1, 2, 1]),
+	left: new Sprite('img/hero.png', [0, 48], [48, 30], 5, [0, 1, 2, 1]),
+	right: new Sprite('img/hero.png', [0, 96], [48, 30], 5, [0, 1, 2, 1])
 };
 
 var towers = [];
@@ -83,8 +88,8 @@ var score = 0;
 var scoreEl = document.getElementById('score');
 
 // Speed in pixels per second
-var playerSpeed = 100;
-var bulletSpeed = 300;
+var playerSpeed = 150;
+var bulletSpeed = 350;
 var enemySpeed = 50;
 
 // Update game objects
@@ -100,30 +105,26 @@ function update(dt) {
 		switch (getRandomInt(0,4)) {
 		    case 0:	//left
 			enemies.push({
-				pos: [0, Math.random() * (canvas.height - 35)],
-				dir: 'left',
-				sprite: new Sprite('img/spider.png', [0, 0], [40, 35], 5, [0, 1, 2, 1])
+				pos: [0, Math.random() * (canvas.height - 30)],
+				sprite: new Sprite('img/spider.png', [0, 0], [40, 30], 5, [0, 1, 2, 1])
 			});
 			break;
 		    case 1:	//top
 			enemies.push({
 				pos: [Math.random() * canvas.width, 0],
-				dir: 'top',
-				sprite: new Sprite('img/spider.png', [0, 0], [40, 35], 5, [0, 1, 2, 1])
+				sprite: new Sprite('img/spider.png', [0, 0], [40, 30], 5, [0, 1, 2, 1])
 			});
 			break;
 			case 2:	//bottom
 			enemies.push({
-				pos: [Math.random() * canvas.width, canvas.height - 35],
-				dir: 'bottom',
-				sprite: new Sprite('img/spider.png', [0, 0], [40, 35], 5, [0, 1, 2, 1])
+				pos: [Math.random() * canvas.width, canvas.height - 30],
+				sprite: new Sprite('img/spider.png', [0, 0], [40, 30], 5, [0, 1, 2, 1])
 			});
 			break;
-			default:	//right
+			default: //right
 			enemies.push({
-				pos: [canvas.width, Math.random() * (canvas.height - 35)],
-				dir: 'right',
-				sprite: new Sprite('img/spider.png', [0, 0], [40, 35], 5, [0, 1, 2, 1])
+				pos: [canvas.width, Math.random() * (canvas.height - 30)],
+				sprite: new Sprite('img/spider.png', [0, 0], [40, 30], 5, [0, 1, 2, 1])
 			});
 			break;
 		}
@@ -137,22 +138,22 @@ function update(dt) {
 function handleInput(dt) {
     if (input.isDown('DOWN') || input.isDown('s')) {
         player.pos[1] += playerSpeed * dt;
-		player.sprite = new Sprite('img/hero.png', [0, 0], [64, 64], 5, [0, 1, 2, 1]);
+		player.sprite = player.down;
     }
 
     if (input.isDown('UP') || input.isDown('w')) {
         player.pos[1] -= playerSpeed * dt;
-		player.sprite = new Sprite('img/hero.png', [0, 192], [64, 64], 5, [0, 1, 2, 1]);
+		player.sprite = player.up;
 	}
 
     if (input.isDown('LEFT') || input.isDown('a')) {
         player.pos[0] -= playerSpeed * dt;
-		player.sprite = new Sprite('img/hero.png', [0, 64], [64, 64], 5, [0, 1, 2, 1]);
+		player.sprite = player.left;
     }
 
     if (input.isDown('RIGHT') || input.isDown('d')) {
         player.pos[0] += playerSpeed * dt;
-		player.sprite = new Sprite('img/hero.png', [0, 128], [64, 64], 5, [0, 1, 2, 1]);
+		player.sprite = player.right;
     }
 
     if (input.isDown('SPACE') && !isGameOver) {
@@ -192,7 +193,7 @@ function updateEntities(dt) {
 			bullets.push({
 				pos: [x, y],
 				k: getRandomArbitrary(-5 * pi, 5 * pi),
-				sprite: new Sprite('img/sprites.png', [0, 39], [18, 8]) 
+				sprite: new Sprite('img/bullet.png', [0, 0], [24, 24]) 
 			});
 			tower.lastFire = Date.now();
 		}
@@ -220,23 +221,17 @@ function updateEntities(dt) {
 
     // Update all the enemies
     for (var i = 0; i < enemies.length; i++) {
-	
-		if (enemies[i].dir === 'left') {
-			enemies[i].pos[0] += enemySpeed * dt;
-			enemies[i].sprite.update(dt);
-		}
-        else if (enemies[i].dir === 'top') {
-			enemies[i].pos[1] += enemySpeed * dt;
-			enemies[i].sprite.update(dt);
-		}
-		else if (enemies[i].dir === 'right') {
-			enemies[i].pos[0] -= enemySpeed * dt;
-			enemies[i].sprite.update(dt);
-		}
-		else if (enemies[i].dir === 'bottom') {
-			enemies[i].pos[1] -= enemySpeed * dt;
-			enemies[i].sprite.update(dt);
-		}
+	    var x0 = enemies[i].pos[0];
+		var y0 = enemies[i].pos[1];
+		var x1 = player.pos[0];
+		var y1 = player.pos[1];
+		var c = enemySpeed * dt;
+		var l = Math.sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+		
+		enemies[i].pos[0] += (x1 - x0) * c / l;
+		enemies[i].pos[1] += (y1 - y0) * c / l;
+		
+		enemies[i].sprite.update(dt);
 
         // Remove if offscreen
         if (enemies[i].pos[0] + enemies[i].sprite.size[0] < 0) {
@@ -373,6 +368,7 @@ function reset() {
     document.getElementById('game-over-overlay').style.display = 'none';
     isGameOver = false;
     gameTime = 0;
+	lastTower = 0;
     score = 0;
 
 	towers = [];
